@@ -56,9 +56,87 @@ finalandgoldenboot <- scoretest%>%
 
 ## 📊 Scoreboard as of `r format(Sys.Date(), '%B %d, %Y')`
 
-<b> <b> Scoreboard will be displayed after the 1st game <b> <b>
+<b> <b>
+
+``` {r scoreboard, warning=FALSE, message=FALSE, echo = FALSE}
+
+fullscore <- scoretest%>%
+  # Remove empty columns (all NA or all empty string)
+  select(where(~!all(is.na(.) ))) %>%
+  # Keep only the columns you want
+  select(Player,
+         round,
+         starts_with("scoregame"),
+         starts_with("sumgoal"),
+         starts_with("diffgoal"),
+         starts_with("resultgame"))%>%
+  pivot_longer(
+    cols = starts_with(c("scoregame", "sumgoalgame", "diffgoalgame", "resultgame")),
+    names_to = c(".value", "game"),
+    names_pattern = "(score|sumgoal|diffgoal|resultgame)(.*)"
+  )%>%
+  mutate( predictioncode = case_when(diffgoal == 0 ~ "D",
+                                     diffgoal > 0 ~ "W1",
+                                     diffgoal < 0 ~ "W2", TRUE ~ NA))%>%
+  right_join( gamelistfull%>% select(matchnumber,ResultGame, ScorerGame, Resultcode, DiffGame)%>%filter(!is.na(Resultcode)), by = c("game" = "matchnumber"))%>%
+  mutate(`Prediction Result` = case_when(  score==ResultGame ~ "Correct score",
+                                          diffgoal == DiffGame & Resultcode != "D" ~ "Correct goal difference",
+                                          predictioncode == Resultcode ~ "Correct result",
+                                         TRUE ~ NA
+                                             ),
+         Points = case_when( `Prediction Result` ==  "Correct score"  & (round == "1st" | round == "2nd" |round == "3rd" ) ~ 10,
+                             `Prediction Result` ==  "Correct goal difference"  & (round == "1st" | round == "2nd" |round == "3rd" ) ~ 5,
+                             `Prediction Result` ==  "Correct result"  & (round == "1st" | round == "2nd" |round == "3rd" ) ~ 3,                            TRUE ~ NA)) 
+
+Playerpredictsummary <-fullscore%>%
+  filter(!is.na(`Prediction Result`))%>%
+  group_by(Player, `Prediction Result`) %>%
+  summarise(Count = n()
+  ) %>%
+  pivot_wider(
+    id_cols = Player,  # Keep Player as first column
+    names_from = `Prediction Result`,
+    values_from = Count,
+    values_fill = 0
+  )%>%
+  select(Player,
+         `Correct score`,
+         `Correct goal difference`,
+         `Correct result`)
 
 
+Playerpredictpoints <-fullscore%>%
+  filter(!is.na(`Prediction Result`))%>%
+  group_by(Player) %>%
+  summarise(Points = sum(Points, na.rm = TRUE)
+  ) %>%
+  full_join(Playerpredictsummary, by = "Player")%>%
+  arrange(desc(Points),desc(`Correct score`), Player )
+
+
+  Playerpredictpoints%>%
+    kbl(
+    caption = "<b>Score board</b>",
+    align = 'c',
+    booktabs = TRUE
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center",
+    font_size = 14
+  ) %>%
+  row_spec(0, background = "#2c3e50", color = "white", bold = TRUE) %>%
+  column_spec(1, background = "#e8eaf6", color = "#1a237e", bold = TRUE) %>% #e8eaf6
+  column_spec(2, background =  "#F08784", color = "#0c5460", bold = TRUE) %>%
+  column_spec(3, background = "#AAC0C4", color = "#0c5460") %>%
+  column_spec(4, background = "#d1ecf1", color = "#0c5460") %>%
+  column_spec(5, background = "#d1ecf1", color = "#0c5460") 
+
+
+```
+
+<b> <b>
 
 ## 🏆Final 🏆 and Golden Boot 👟⚽ prediction
 
@@ -85,6 +163,7 @@ finalandgoldenboot %>%
   column_spec(4, background = "#fff3cd", color = "#856404", bold = TRUE) 
 
 ```
+
 <b> <b> Top 5 scorers will be displayed after the 1st game <b> <b>
 
 ## 👨‍⚖️ 🏃‍♂️ 🥅 1st round group phase predictions and results
@@ -153,19 +232,21 @@ p
 
 ```
 
-## Upcoming games  👟
+## Upcoming games 👟
+
 <b> <b>
 
 ```{r games, warning=FALSE, message=FALSE, echo = FALSE}
 
 gamelistfull %>%
-  filter(Date == "11/06/2026"|
-           Date == "12/06/2026"|
+  filter(Date == "12/06/2026"|
            Date == "13/06/2026"|
            Date == "14/06/2026"|
            Date == "15/06/2026"|
            Date == "16/06/2026"|
-           Date == "17/06/2026")%>%
+           Date == "17/06/2026" |
+           Date == "18/06/2026"
+           )%>%
   select(Match, Date, Time)%>%
   kbl(
     caption = "<b>Game for the upcoming 7 days</b>",
@@ -184,4 +265,6 @@ gamelistfull %>%
   column_spec(3, background = "#fff3cd", color = "#856404", bold = TRUE) 
 
 ```
-<b> <b> 
+
+<b> <b>
+
