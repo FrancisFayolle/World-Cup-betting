@@ -165,7 +165,7 @@ finalandgoldenboot %>%
 
 ```
 
-<b> <b> Top 5 scorers will be displayed after the 1st round <b> <b>
+<b> <b>
 
 ```{r goldenboot, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -229,31 +229,41 @@ scoretableround1 <- scoretest%>%
                                      diffgoal < 0 ~ "W2", TRUE ~ NA))%>%
   left_join( gamelist, by = c("game" = "matchnumber"))
 
-
+# Query results 
+resultstableround1 <- gamelistfull%>%
+  filter(grepl("1st", Phase) & !is.na(ResultGame))%>%
+  select(Match, score = ResultGame,predictioncode=Resultcode)%>%
+  mutate(Player = "Final Result")
 
 plot_data <- scoretableround1 %>%
   select(Match, Player, score, predictioncode) %>%
+  bind_rows(resultstableround1)%>%
   mutate(
-    Player = factor(Player, levels = unique(scoretableround1$Player)),
+    Player  = forcats::fct_relevel(factor(Player), "Final Result", after = Inf),
     Match = factor(Match, levels = rev(unique(scoretableround1$Match))),
     predictioncode = factor(predictioncode, levels = c("W1", "D", "W2")) # Reverse for better display
   )
 
 p <- ggplot(plot_data, aes(x = Player, y = Match)) +
-  geom_tile(aes(fill = predictioncode), color = "white", linewidth = 0.5) +
+  geom_tile(aes(fill = predictioncode, alpha = Player == "Final Result"), 
+            color = "white", linewidth = 0.5) +
   geom_text(aes(label = score), size = 3.5) +
   scale_fill_manual(
     values = c(
-      "W1" = "#83f28f",  
-      "D" = "#fff3cd",   
-      "W2" = "#d1ecf1"   
+      "W1" = "#83f28f",
+      "D" = "#fff3cd",
+      "W2" = "#d1ecf1"
     ),
     name = "Prediction",
-    breaks = c("W1", "D", "W2")  # Explicitly set legend order
+    breaks = c("W1", "D", "W2")
   ) +
+  scale_alpha_manual(values = c("TRUE" = 0.7, "FALSE" = 1), guide = "none") +
+  # Add vertical line
+  geom_vline(xintercept = which(levels(plot_data$Player) == "Final Result") - 0.5,
+             linewidth = 1.5, color = "black") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1.2, size = 10),  # 90-degree angle
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1.2, size = 10),
     axis.text.y = element_text(size = 9),
     axis.title = element_blank(),
     panel.grid = element_blank(),
@@ -266,8 +276,6 @@ p <- ggplot(plot_data, aes(x = Player, y = Match)) +
   )
 
 p
-
-# Add the results in a last column, diff colour
 
 
 ```
