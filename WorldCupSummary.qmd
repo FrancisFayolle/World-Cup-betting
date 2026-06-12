@@ -167,6 +167,42 @@ finalandgoldenboot %>%
 
 <b> <b> Top 5 scorers will be displayed after the 1st round <b> <b>
 
+```{r goldenboot, echo=FALSE, warning=FALSE, message=FALSE}
+
+# Extract from game list the values of the scorer, split by delimiter, count and 
+# left_join to ref list
+
+# Count occurrences of each value
+goldenboot<-gamelistfull %>%
+  filter(!is.na(ScorerGame))%>%
+  mutate(answers = str_split(ScorerGame, ", ")) %>%
+  unnest(answers) %>%
+  count(answers)%>%
+  left_join(players%>%select(name, full_name), by = c("answers" ="name"))%>%
+  select( `Player Name` = full_name, 
+          Goals = n)%>%
+  slice_max(order_by = Goals, n = 5)
+
+goldenboot%>%
+  kbl(
+    caption = "<b>Current top 5 scorer</b>",
+    align = 'c',
+    booktabs = TRUE
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center",
+    font_size = 14
+  ) %>%
+  row_spec(0, background = "#2c3e50", color = "white", bold = TRUE) %>%
+  column_spec(1, background = "#e8eaf6", color = "#1a237e", bold = TRUE) %>%
+  column_spec(2, background = "#d1ecf1", color = "#0c5460") 
+ 
+
+
+```
+
 ## 👨‍⚖️ 🏃‍♂️ 🥅 1st round group phase predictions and results
 
 <b> <b>
@@ -192,6 +228,8 @@ scoretableround1 <- scoretest%>%
                                      diffgoal > 0 ~ "W1",
                                      diffgoal < 0 ~ "W2", TRUE ~ NA))%>%
   left_join( gamelist, by = c("game" = "matchnumber"))
+
+
 
 plot_data <- scoretableround1 %>%
   select(Match, Player, score, predictioncode) %>%
@@ -229,6 +267,7 @@ p <- ggplot(plot_data, aes(x = Player, y = Match)) +
 
 p
 
+# Add the results in a last column, diff colour
 
 
 ```
@@ -249,6 +288,7 @@ gamelistfull %>%
            Date == "18/06/2026"
            )%>%
   select(Match, Date, Time)%>%
+  arrange(Date)%>%
   kbl(
     caption = "<b>Game for the upcoming 7 days</b>",
     align = 'c',
@@ -264,6 +304,8 @@ gamelistfull %>%
   column_spec(1, background = "#e8eaf6", color = "#1a237e", bold = TRUE) %>%
   column_spec(2, background = "#d1ecf1", color = "#0c5460") %>%
   column_spec(3, background = "#fff3cd", color = "#856404", bold = TRUE) 
+
+
 
 ```
 

@@ -5,7 +5,8 @@ setwd("C:/Users/francis.fayolle/OneDrive - United Nations Development Programme/
 gameschedule <- read_excel("./gameschedule.xlsx")
 other <- read_excel("./otherquest.xlsx", sheet = "survey")%>%
   mutate( required = as.character(required))
-players <- read_excel("./otherquest.xlsx", sheet = "choices")
+players <- read_excel("./otherquest.xlsx", sheet = "choices")%>%
+  select(-full_name)
 
 ##### Group Stage Games #####
 
