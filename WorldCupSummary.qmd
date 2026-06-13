@@ -181,6 +181,8 @@ goldenboot<-gamelistfull %>%
   left_join(players%>%select(name, full_name), by = c("answers" ="name"))%>%
   select( `Player Name` = full_name, 
           Goals = n)%>%
+  mutate( `Player Name` = case_when( is.na(`Player Name`) ~ "Own Goal", 
+                                     TRUE ~  `Player Name`))%>%
   slice_max(order_by = Goals, n = 5)
 
 goldenboot%>%
