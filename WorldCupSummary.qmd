@@ -139,9 +139,7 @@ Playerpredictpoints <-fullscore%>%
 ```
 
 <b> <b>
-``` {r leaders, warning=FALSE, message=FALSE, echo = FALSE, include = FALSE}
-
-
+``` {r leaders, warning=FALSE, message=FALSE, echo = FALSE}
 Leaders <-fullscore%>% 
   group_by(Player, Date)%>%
   summarise(Points = sum(Points, na.rm =TRUE))%>%
@@ -161,23 +159,55 @@ Leaders <-fullscore%>%
   ) %>%
   arrange(Date, Ranking) %>%
   ungroup()%>%
-  select(Player, Date, Ranking)%>%
-  pivot_wider(names_from = Date, values_from = Ranking)
+  select(Player, Date, Ranking)
+leadertable <- ggplot(Leaders, aes(x = Date, y = Player)) +
+  geom_tile(aes(fill = Ranking), 
+            color = "white", linewidth = 0.5) +
+  geom_text(aes(label = Ranking), size = 3.5, fontface = "bold") +
+  scale_fill_manual(
+    values = c(
+      "1st" = "gold",
+      "2nd" = "#C0C0C0",
+      "3rd" = "#CD7F32",
+      "8th" = "#ff2c2c"
+    ),
+    na.value = "#d1ecf1",  # Default background for all other values
+    guide = "none"
+  ) +
+  theme_minimal() +
+  theme(
+    # X-axis on top with proper alignment and bold text
+    axis.text.x.top = element_text(
+      angle = 45, 
+      hjust = 0, 
+      vjust = 0, 
+      size = 10,
+      face = "bold",  # Make x-axis labels bold
+      margin = margin(b = 2)  # Reduce space below labels
+    ),
+    axis.text.x = element_blank(),  # Hide bottom x-axis
+    # Y-axis labels bold
+    axis.text.y = element_text(
+      size = 9,
+      face = "bold"  # Make y-axis labels bold
+    ),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    plot.title = element_text(
+      hjust = 0.5, 
+      size = 12, 
+      face = "bold"
+    ),
+    # Reduce margins to bring labels closer
+    plot.margin = margin(t = 5, r = 5, b = 5, l = 5)
+  ) +
+  scale_x_discrete(position = "top") +
+  labs(
+    title = "Evolution of positions"
+  )
 
-Leaders%>%
-    kbl(
-    caption = "<b>Evolution of positions</b>",
-    align = 'c',
-    booktabs = TRUE
-  ) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-    full_width = FALSE,
-    position = "center",
-    font_size = 14
-  ) %>%
-  row_spec(0, background = "#2c3e50", color = "white", bold = TRUE) %>%
-  column_spec(1, background = "#e8eaf6", color = "#1a237e", bold = TRUE)
+leadertable
 
 ```
 <b> <b>
