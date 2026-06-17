@@ -136,8 +136,6 @@ Playerpredictpoints <-fullscore%>%
 
 ```
 
-<b> <b>
-
 ```{r leaders, warning=FALSE, message=FALSE, echo = FALSE}
 Leaders <-fullscore%>% 
   group_by(Player, Date)%>%
@@ -215,8 +213,6 @@ leadertable
 
 ```
 
-<b> <b>
-
 ## 🏆Final 🏆 and Golden Boot 👟⚽ prediction
 
 ```{r final, warning=FALSE, message=FALSE, echo = FALSE}
@@ -240,8 +236,6 @@ finalandgoldenboot %>%
   column_spec(4, background = "#fff3cd", color = "#856404", bold = TRUE) 
 
 ```
-
-<b> <b>
 
 ```{r goldenboot, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -280,8 +274,6 @@ goldenboot%>%
 
 
 ```
-
-<b> <b>
 
 ## 👨‍⚖️ 🏃‍♂️ 🥅 Group phase predictions and results
 
@@ -359,8 +351,6 @@ p
 
 ```
 
-<b> <b>
-
 ```{r printroundTT, echo=FALSE, warning=FALSE, message=FALSE, include = FALSE, fig.height= 10}
 scoretableround2 <- scoretest%>%
    select(where(~!all(is.na(.) ))) %>%
@@ -434,8 +424,6 @@ pround2
 
 ```
 
-<b> <b>
-
 ## Upcoming games 👟
 
 ```{r games, warning=FALSE, message=FALSE, echo = FALSE}
@@ -470,5 +458,3 @@ gamelistfull %>%
 
 
 ```
-
-<b> <b>
