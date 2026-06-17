@@ -58,8 +58,6 @@ finalandgoldenboot <- scoretest%>%
 
 ## 📊 Scoreboard as of `r format(Sys.Date(), '%B %d, %Y')`
 
-<b> <b>
-
 ```{r scoreboard, warning=FALSE, message=FALSE, echo = FALSE}
 
 fullscore <- scoretest%>%
@@ -137,8 +135,6 @@ Playerpredictpoints <-fullscore%>%
 
 
 ```
-
-<b> <b>
 
 ```{r leaders, warning=FALSE, message=FALSE, echo = FALSE}
 Leaders <-fullscore%>% 
@@ -219,9 +215,7 @@ leadertable
 
 <b> <b>
 
-##   🏆Final 🏆 and Golden Boot 👟⚽ prediction 
-
-<b> <b>
+## 🏆Final 🏆 and Golden Boot 👟⚽ prediction
 
 ```{r final, warning=FALSE, message=FALSE, echo = FALSE}
 
@@ -287,9 +281,7 @@ goldenboot%>%
 
 <b> <b>
 
-##   👨‍⚖️ 🏃‍♂️ 🥅 Group phase predictions and results 
-
-<b> <b>
+## 👨‍⚖️ 🏃‍♂️ 🥅 Group phase predictions and results
 
 ```{r printround1, warning=FALSE, message=FALSE, echo = FALSE}
 scoretableround1 <- scoretest%>%
@@ -442,7 +434,7 @@ pround2
 
 <b> <b>
 
-##  Upcoming games 👟 
+## Upcoming games 👟
 
 ```{r games, warning=FALSE, message=FALSE, echo = FALSE}
 
