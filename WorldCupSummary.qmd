@@ -136,6 +136,8 @@ Playerpredictpoints <-fullscore%>%
 
 ```
 
+<b> <b>
+
 ```{r leaders, warning=FALSE, message=FALSE, echo = FALSE}
 Leaders <-fullscore%>% 
   group_by(Player, Date)%>%
