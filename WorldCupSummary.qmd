@@ -146,14 +146,14 @@ Leaders <-fullscore%>%
   ungroup() %>%
   group_by(Date) %>%
   mutate(
-    rank_num = dense_rank(desc(cumulative_points)),
+    rank_num = rank(desc(cumulative_points), ties.method = "first"),
     Ranking = case_when(
       rank_num == 1 ~ "1st",
       rank_num == 2 ~ "2nd",
       rank_num == 3 ~ "3rd",
-      TRUE ~ paste0(rank_num, "th")
-    )
-  ) %>%
+      TRUE ~ paste0(rank_num, "th")),
+      Date = substr(Date, 1, 5)
+    ) %>%
   arrange(Date, Ranking) %>%
   ungroup()%>%
   select(Player, Date, Ranking)
@@ -178,7 +178,7 @@ leadertable <-  ggplot(Leaders, aes(x = Date, y = Player)) +
       angle = 45, 
       hjust = 0, 
       vjust = 0, 
-      size = 10,
+      size = 7,
       face = "bold",
       margin = margin(b = 2)
     ),
@@ -204,7 +204,7 @@ leadertable <-  ggplot(Leaders, aes(x = Date, y = Player)) +
   ) +
   scale_x_discrete(position = "top") +
   # Control the size of tiles
-  coord_fixed(ratio = 0.3) +  # Adjust ratio to control tile width/height
+  coord_fixed(ratio = 0.5) +  # Adjust ratio to control tile width/height
   labs(
     title = "Evolution of positions"
   )
