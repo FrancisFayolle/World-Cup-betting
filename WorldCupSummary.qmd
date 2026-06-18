@@ -355,14 +355,15 @@ pround2
 ```{r games, warning=FALSE, message=FALSE, echo = FALSE}
 
 gamelistfull %>%
-  filter(Date == "17/06/2026"|
-           Date == "18/06/2026"|
+  filter(Date == "18/06/2026"|
            Date == "19/06/2026"|
            Date == "20/06/2026"|
            Date == "21/06/2026"|
            Date == "22/06/2026"|
            Date == "23/06/2026"|
-            Date == "24/06/2026")%>%
+            Date == "24/06/2026"|
+           Date == "25/06/2026"
+  )%>%
   select(Match, Date, Time)%>%
   arrange(Date)%>%
   kbl(
