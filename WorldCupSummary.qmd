@@ -157,6 +157,7 @@ Leaders <-fullscore%>%
   arrange(Date, Ranking) %>%
   ungroup()%>%
   select(Player, Date, Ranking)
+
 leadertable <-  ggplot(Leaders, aes(x = Date, y = Player)) +
   geom_tile(aes(fill = Ranking), 
             color = "white", linewidth = 0.5) +
@@ -355,15 +356,8 @@ pround2
 ```{r games, warning=FALSE, message=FALSE, echo = FALSE}
 
 gamelistfull %>%
-  filter(Date == "18/06/2026"|
-           Date == "19/06/2026"|
-           Date == "20/06/2026"|
-           Date == "21/06/2026"|
-           Date == "22/06/2026"|
-           Date == "23/06/2026"|
-            Date == "24/06/2026"|
-           Date == "25/06/2026"
-  )%>%
+  mutate(Date = as.Date(gsub("\\?", "/", Date), format = "%d/%m/%Y"))%>%
+  filter(Date  >= Sys.Date() & Date <= Sys.Date() + 7)%>%
   select(Match, Date, Time)%>%
   arrange(Date)%>%
   kbl(
