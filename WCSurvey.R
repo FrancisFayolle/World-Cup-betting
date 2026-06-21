@@ -1,7 +1,7 @@
 library(readxl)
 library(tidyverse)
 library(writexl)
-#setwd("C:/Users/francis.fayolle/OneDrive - United Nations Development Programme/Documents/World Cup Betting")
+
 gameschedule <- read_excel("./gameschedule.xlsx")
 other <- read_excel("./otherquest.xlsx", sheet = "survey")%>%
   mutate( required = as.character(required))
