@@ -343,7 +343,7 @@ pround2 <- ggplot(plot_data2nd, aes(x = Player, y = Match)) +
     plot.title = element_text(hjust = 0.5, size = 12, face = "bold")
   ) +
   labs(
-    title = "Predictions - 1st Round",
+    title = "Predictions - Group Phase",
     subtitle = "W1=Home Win, D=Draw, W2=Away Win"
   )
 
