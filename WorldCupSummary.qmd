@@ -136,7 +136,7 @@ Playerpredictpoints <-fullscore%>%
 
 ```
 
-```{r leaders, warning=FALSE, message=FALSE, echo = FALSE}
+```{r leaders, warning=FALSE, message=FALSE, echo = FALSE, fig.width= 10}
 Leaders <-fullscore%>% 
   group_by(Player, Date)%>%
   summarise(Points = sum(Points, na.rm =TRUE))%>%
@@ -199,7 +199,7 @@ leadertable <-  ggplot(Leaders, aes(x = Date, y = Player)) +
       face = "bold"
     ),
     # Reduce margins
-    plot.margin = margin(t = 5, r = 5, b = 5, l = 5),
+    #plot.margin = margin(t = 1, r = 1, b = 1, l = 1)
     # Remove aspect ratio constraint
     aspect.ratio = NULL
   ) +
@@ -278,7 +278,7 @@ goldenboot%>%
 
 ## 👨‍⚖️ 🏃‍♂️ 🥅 Group phase predictions and results
 
-```{r printroundTT, echo=FALSE, warning=FALSE, message=FALSE,  fig.height= 10}
+```{r printroundTT, echo=FALSE, warning=FALSE, message=FALSE,  fig.height= 12,  fig.width= 10}
 scoretableround2 <- scoretest%>%
    select(where(~!all(is.na(.) ))) %>%
   group_by(Player)%>%
