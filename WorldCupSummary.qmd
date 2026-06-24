@@ -357,7 +357,7 @@ pround2
 
 gamelistfull %>%
   mutate(Date = as.Date(gsub("\\?", "/", Date), format = "%d/%m/%Y"))%>%
-  filter(Date  >= Sys.Date() & Date <= Sys.Date() + 7)%>%
+  filter(Date  >= Sys.Date() & Date <= Sys.Date() + 7 & !(Date == Sys.Date() & Time <= "12:00"))%>%
   select(Match, Date, Time)%>%
   arrange(Date)%>%
   kbl(
