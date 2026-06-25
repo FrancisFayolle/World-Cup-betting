@@ -263,3 +263,8 @@ For this game you can only select ${",  paste0("final", .$matchnumber), "} playe
     
     
     rm(other)
+    
+    
+    
+# In survey: 
+# if draw, choose from the two teams the winning one

@@ -114,6 +114,9 @@ Playerpredictpoints <-fullscore%>%
   arrange(desc(Points),desc(`Correct score`), Player )
 
 
+# modify the code to integrate the draw calculations, the multiplier, the goalscorer variable
+
+
   Playerpredictpoints%>%
     kbl(
     caption = "<b>Score board</b>",
