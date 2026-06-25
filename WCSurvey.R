@@ -113,7 +113,7 @@ choices <- bind_rows(players,
 questionnaire <- list(survey = survey,
                       choices = choices)
 
-write_xlsx(questionnaire, "./surveyWCgroup.xlsx")
+#write_xlsx(questionnaire, "./surveyWCgroup.xlsx")
 
 ##### Knockout Stage Games #####
 
@@ -122,7 +122,7 @@ write_xlsx(questionnaire, "./surveyWCgroup.xlsx")
 
 choicesknock <- gameschedule %>%
   # Filter out rows with "TBD" in ISO Code (knockout stage placeholder matches)
-  filter(!grepl("TBD", `ISO Code`) & (round != "1st" |round != "2nd" |round != "3rd")) %>%
+  filter(!grepl("TBD", `ISO Code`) & round != "1st" & round != "2nd" & round != "3rd") %>%
   # Create the two rows per match
   rowwise() %>%
   do({
@@ -149,21 +149,22 @@ head(choicesknock)
 
 surveyknock <- gameschedule %>%
   # Filter out TBD matches (optional - remove if you want to keep them)
-  filter(!grepl("TBD", `ISO Code`)) %>%
+  filter(!grepl("TBD", `ISO Code`) & round != "1st" & round != "2nd" & round != "3rd") %>%
   arrange(phase)%>%
   # Create three rows per game
   rowwise() %>%
   do({
     # Extract ISO codes for default value
     iso_codes <- .$`ISO Code`
-    
     # Create the three rows for each game
     data.frame(
       type = c("text", 
                "calculate",
                "calculate",
                "calculate",
+               
                "note",
+               "select_one country",
                "hidden",
                "select_multiple players"),
       name = c(paste0("score", .$matchnumber), 
@@ -171,6 +172,8 @@ surveyknock <- gameschedule %>%
                paste0("diffgoal", .$matchnumber),
                paste0("resultgame", .$matchnumber),
                paste0("note", .$matchnumber),
+               paste0("draw", .$matchnumber),
+              
                .$matchnumber,
                paste0(.$matchnumber, "scorer")),
       label = c(  paste0( .$phase, " : ", .$Match),
@@ -178,6 +181,7 @@ surveyknock <- gameschedule %>%
                   "calcdiffgoal",
                   "resultgame",  
                   paste0("${", paste0("resultgame", .$matchnumber), "}", " ${score", .$matchnumber, "}"),
+                  "As you selected a draw, please enter the winning team at penalty shootout",
                   NA,
                   "Select scorers"),
       hint = c("Register the score in the order of the teams in the title. 
@@ -185,18 +189,32 @@ Only numbers separated by a - i.e.:  0-0  ;  3-1 ",
                NA, 
                NA,
                NA,
+               
                NA,
+               "Select one",
                NA,
                paste0("Select scorers, be careful of the number of goals per team you register.
-For this game you can only select ${",  paste0("final", .$matchnumber), "} players.")),
+For this game you can only select ${",  paste0("sumgoal", .$matchnumber), "} players.")),
       constraint_message = c("Use the format number-number",
                              NA,
                              NA,
                              NA,
+                             
                              NA,
+                             "Select one team only",
                              NA,
-                             paste0("Review, you must select ${", paste0("final", .$matchnumber), "} players!" )),
+                             paste0("Review, you must select only ${", paste0("sumgoal", .$matchnumber), "} players!" )),
+      choice_filter = c(NA,
+                        NA,
+                        NA,
+                        NA,
+                        NA,
+                        paste0(paste0("selected(${", .$matchnumber, "}, squad)")),
+                        
+                        NA,
+                        paste0(paste0("selected(${", .$matchnumber, "}, squad)"))),
       default = c(NA,
+                  NA,
                   NA,
                   NA,
                   NA,
@@ -208,6 +226,8 @@ For this game you can only select ${",  paste0("final", .$matchnumber), "} playe
                    NA,
                    NA,
                    NA,
+                   "TRUE",
+                   
                    NA,
                    "TRUE"),
       relevant = c( paste0("${round} = '",.$round,"'" ),
@@ -215,6 +235,7 @@ For this game you can only select ${",  paste0("final", .$matchnumber), "} playe
                     paste0("${round} = '",.$round,"'" ),
                     paste0("${round} = '",.$round,"'" ),
                     paste0("${round} = '",.$round,"'" ),
+                    paste0("${round} = '",.$round,"' and ${diffgoal", .$matchnumber,"} = 0"),
                     paste0("${round} = '",.$round,"'" ),
                     paste0("${round} = '",.$round,"'")
                     ),
@@ -224,11 +245,13 @@ For this game you can only select ${",  paste0("final", .$matchnumber), "} playe
                      NA,
                      NA,
                      NA,
-                     paste0("count-selected(.)=${final", .$matchnumber, "}" )),
+                     NA,
+                     paste0("count-selected(.)=${sumgoal", .$matchnumber, "}" )),
       calculation = c(NA, 
                       paste0("substr(${score", .$matchnumber, "}, 0, 1) + substr(${score", .$matchnumber, "}, 2, 4)"), 
                       paste0("substr(${score", .$matchnumber, "}, 0, 1) - substr(${score", .$matchnumber, "}, 2, 4)"),
-                      paste0("if(${diffgoal", .$matchnumber,"} > 0, '", .$hometeam, "  wins!!! ', if(${diffgoal", .$matchnumber,"} = 0, '", .$hometeam, " and ", .$awayteam , "  draw!!!  ', if(${diffgoal", .$matchnumber,"} < 0, '", .$awayteam, "  wins!!!  by  ', 'Please enter a score')))"),
+                      paste0("if(${diffgoal", .$matchnumber,"} > 0, '", .$hometeam, "  wins!!! ', if(${diffgoal", .$matchnumber,"} = 0, '", .$hometeam, " and ", .$awayteam , "  draw!!! ', if(${diffgoal", .$matchnumber,"} < 0, '", .$awayteam, "  wins!!!  by  ', 'Please enter a score')))"),
+                      NA,
                       NA,
                       NA,
                       NA),
@@ -238,9 +261,10 @@ For this game you can only select ${",  paste0("final", .$matchnumber), "} playe
                      NA,
                      NA,
                      NA,
+                     NA,
                      "minimal"),
       stringsAsFactors = FALSE)
-  }) %>%
+  })%>%
       ungroup()
     
     
@@ -248,23 +272,13 @@ For this game you can only select ${",  paste0("final", .$matchnumber), "} playe
     head(surveyknock, 10)
     
     
-    survey <- bind_rows(other,
-                        survey,
-                        surveyknock)
+    surveyknock<- bind_rows(survey,
+                        surveyknock
+                        )
+  
     
-    choicesknock <- bind_rows(players,
-                              choices,
-                              choicesknock)
-    
-    questionnaire <- list(survey = survey,
-                          choices = choices)
-    
-    write_xlsx(questionnaire, "C:/Users/francis.fayolle/Downloads/surveyWCgroup.xlsx")
+    questionnaireknock <- list(survey = surveyknock,
+                          choices = players)
     
     
-    rm(other)
-    
-    
-    
-# In survey: 
-# if draw, choose from the two teams the winning one
+    write_xlsx(questionnaireknock, "./surveyWCknock.xlsx")

@@ -60,7 +60,9 @@ finalandgoldenboot <- scoretest%>%
 
 ```{r scoreboard, warning=FALSE, message=FALSE, echo = FALSE}
 
+# Group Phase
 fullscore <- scoretest%>%
+  filter(round == "1st" |round == "2nd" |round == "3rd")%>%
   # Remove empty columns (all NA or all empty string)
   select(where(~!all(is.na(.) ))) %>%
   # Keep only the columns you want
@@ -87,6 +89,11 @@ fullscore <- scoretest%>%
          Points = case_when( `Prediction Result` ==  "Correct score"  & (round == "1st" | round == "2nd" |round == "3rd" ) ~ 10,
                              `Prediction Result` ==  "Correct goal difference"  & (round == "1st" | round == "2nd" |round == "3rd" ) ~ 5,
                              `Prediction Result` ==  "Correct result"  & (round == "1st" | round == "2nd" |round == "3rd" ) ~ 3,                            TRUE ~ NA)) 
+
+# knock-out stage
+
+
+
 
 Playerpredictsummary <-fullscore%>%
   filter(!is.na(`Prediction Result`))%>%
