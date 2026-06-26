@@ -152,11 +152,11 @@ Leaders <-fullscore%>%
   summarise(Points = sum(Points, na.rm =TRUE))%>%
  group_by(Player) %>%
   arrange(Date, .by_group = TRUE) %>%
-  mutate(cumulative_points = cumsum(Points)) %>%
+  mutate(cumulative_points = cumsum(Points),) %>%
   ungroup() %>%
   group_by(Date) %>%
   mutate(
-    rank_num = rank(desc(cumulative_points), ties.method = "first"),
+    rank_num = rank(desc(cumulative_points), ties.method = "last"),
     Ranking = case_when(
       rank_num == 1 ~ "1st",
       rank_num == 2 ~ "2nd",
