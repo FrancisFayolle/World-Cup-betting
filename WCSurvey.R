@@ -237,7 +237,7 @@ For this game you can only select ${",  paste0("sumgoal", .$matchnumber), "} pla
                     paste0("${round} = '",.$round,"'" ),
                     paste0("${round} = '",.$round,"' and ${diffgoal", .$matchnumber,"} = 0"),
                     paste0("${round} = '",.$round,"'" ),
-                    paste0("${round} = '",.$round,"'")
+                    paste0("${round} = '",.$round,"' and ${sumgoal", .$matchnumber,"} != 0")
                     ),
       constraint = c("regex(., '^[0-9+]-[0-9+]$')",
                      NA, 
