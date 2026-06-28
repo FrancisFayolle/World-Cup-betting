@@ -13,6 +13,12 @@ library(writexl)
 library(robotoolbox)
 library(kableExtra)
 
+###
+#Tasks:
+# 1. Fix goal scorer list
+# Separate tables for round 32 predictions and results
+# Point counting formula for round of 32 and follwoing
+
 Sys.setenv("KOBOTOOLBOX_URL" = "https://eu.kobotoolbox.org/") # or 
 Sys.setenv("KOBOTOOLBOX_TOKEN" = "ce3ff25f11586de5e5463439d5b0629924aa037e")
 
