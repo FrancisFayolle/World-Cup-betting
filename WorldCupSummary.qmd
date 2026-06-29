@@ -16,7 +16,7 @@ library(kableExtra)
 ###
 #Tasks:
 # Separate tables for round 32 predictions and results: insert thick lines between rounds
-# Point counting formula for round of 32 and following: correct scorer + Penalty win guess
+# Point counting formula for round of 32 and following: correct scorer (revoir si doublé) + Penalty win guess
 # Modify tracking system
 
 Sys.setenv("KOBOTOOLBOX_URL" = "https://eu.kobotoolbox.org/") # or 
@@ -26,7 +26,7 @@ kobo_asset_version_list("aRXZr7eSw3zhFEdX9TKsBP")
 
 players <- read_excel("./otherquest.xlsx", sheet = "choices")
 
-scoretest <- kobo_submissions("aRXZr7eSw3zhFEdX9TKsBP", all_versions = FALSE, select_multiple_label = TRUE)%>%
+scoretest <- kobo_submissions("aRXZr7eSw3zhFEdX9TKsBP", all_versions = FALSE, select_multiple_label = FALSE)%>%
   select( -sumgoalgame9, -diffgoalgame9,-resultgamegame9)%>%
   select(where(~!all(is.na(.) )),
          -matches("^final_.*"),
@@ -59,7 +59,14 @@ finalandgoldenboot <- scoretest%>%
            "ARG" = "Argentina - 👟  ⚽ ",  
            "PRT" = "Portugal - 👟  ⚽ ",  
            "ENG" = "England  - 👟  ⚽ ")
-           )))%>%
+           )),
+         Final =  str_replace_all(Final, c("ESP" = "Spain", 
+                                           "FRA" = "France",
+                                           "ARG" = "Argentina",
+                                           "NLD" = "Netherlands",
+                                           "PRT" = "Portugal",
+                                           "DEU" = "Germany",
+                                           "ENG" = "England")))%>%
   select(-goldenboot)
 
 
@@ -140,10 +147,66 @@ fullscoreko <- scoretest%>%
 
 # Correct scorer Table
 
+scorerknockout <- scoretest%>%
+  filter(round != "1st"  & round != "2nd" & round != "3rd"  )%>%
+  select(where(~!all(is.na(.) ))) %>%
+  rename_with(~ gsub("game([0-9]+)scorer", "goalgame\\1", .x))%>%
+  group_by(Player)%>%
+  summarise(across(everything(), ~ paste(na.omit(.x), collapse = "")))%>%
+  # Keep only the columns you want
+  select(round,
+         Player,  
+         starts_with("goal"))%>%
+  pivot_longer(
+    cols = starts_with(c("goal")),
+    names_to = c(".value", "game"),
+    names_pattern = "(goal)(.*)"
+  )%>%
+  separate_wider_delim(
+  goal, 
+  delim = " ", 
+  names_sep = "_", 
+  too_few = "align_start"
+) %>%
+  # Pivot to longer format
+  pivot_longer(
+    cols = starts_with("goal_"),
+    names_to = NULL,
+    values_to = "goal",
+    values_drop_na = TRUE
+  )
+
+actualscorer <- gamelistfull%>%
+  filter(!grepl("Group", Phase))%>%
+  select(matchnumber, ScorerGame, Date)%>%
+  separate_wider_delim(
+    ScorerGame, 
+    delim = ", ", 
+    names_sep = "_", 
+    too_few = "align_start"
+  ) %>%
+  # Pivot to longer format
+  pivot_longer(
+    cols = starts_with("Scorer"),
+    names_to = NULL,
+    values_to = "ScorerGame",
+    values_drop_na = TRUE
+  )%>%
+  ungroup()%>%  
+  summarise(Buts = n(), .by = c(Date, matchnumber, ScorerGame))
+
+correctscorertable <- scorerknockout%>%
+  inner_join(actualscorer, by = c("game" = "matchnumber", "goal" = "ScorerGame"))%>%
+  mutate( Points = case_when(round == "r32" ~ Buts * 4 * 1.25),
+          `Prediction Result` = "Correct scorer")
+
+
+
 # Merge all tables
 
 fullscorett <- bind_rows(fullscore%>%select(Player,`Prediction Result`, Points, Date),
-                         fullscoreko%>%select(Player,`Prediction Result`, Points, Date))
+                         fullscoreko%>%select(Player,`Prediction Result`, Points, Date),
+                         correctscorertable %>%select(Player, `Prediction Result`, Date, Points) )
 
 # Merge and final scoring
 
@@ -160,7 +223,8 @@ Playerpredictsummary <-fullscorett%>%
   select(Player,
          `Correct score`,
          `Correct goal difference`,
-         `Correct result`)
+         `Correct result`,
+         `Correct scorer`)
 
 
 Playerpredictpoints <-fullscorett%>%
@@ -189,7 +253,8 @@ Playerpredictpoints <-fullscorett%>%
   column_spec(2, background =  "#F08784", color = "#0c5460", bold = TRUE) %>%
   column_spec(3, background = "#AAC0C4", color = "#0c5460") %>%
   column_spec(4, background = "#d1ecf1", color = "#0c5460") %>%
-  column_spec(5, background = "#d1ecf1", color = "#0c5460") 
+  column_spec(5, background = "#d1ecf1", color = "#0c5460") %>%
+  column_spec(6, background = "#d1ecf1", color = "#0c5460")  
 
 
 ```
