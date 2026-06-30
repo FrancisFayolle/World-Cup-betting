@@ -134,15 +134,22 @@ fullscoreko <- scoretest%>%
                                      diffgoal > 0 ~ "W1",
                                      diffgoal < 0 ~ "W2", 
                                      TRUE ~ NA))%>%
-  right_join( gamelistfull%>%filter(!is.na(Resultcode), !grepl("Group", Phase))%>% select(matchnumber,ResultGame, ScorerGame, Resultcode, DiffGame, Date, PenaltyWin), by = c("game" = "matchnumber"))%>%
+  right_join( gamelistfull%>%filter(!is.na(Resultcode), !grepl("Group", Phase))%>% select(matchnumber,ResultGame, ScorerGame, Resultcode, DiffGame, Date, PenaltyWin, PWinCode), by = c("game" = "matchnumber"))%>%
   mutate(`Prediction Result` = case_when(  score==ResultGame ~ "Correct score",
                                            diffgoal == DiffGame & Resultcode != "D" ~ "Correct goal difference",
                                            predictioncode == Resultcode ~ "Correct result",
+                                           # draw + penalty winner correct
+                                           predictioncode == Resultcode & draw == PenaltyWin ~ "Correct result and penalty winner",
+                                           # winner but penalty winner correct
+                                           predictioncode == PWinCode ~ "Penalty winner",
                                            TRUE ~ NA
   ),
   Pointspre = case_when( `Prediction Result` ==  "Correct score" ~ 10,
                       `Prediction Result` ==  "Correct goal difference"   ~ 5,
-                      `Prediction Result` ==  "Correct result"  ~ 3,                            TRUE ~ NA),
+                      `Prediction Result` ==  "Correct result"  ~ 3,  
+                      `Prediction Result` ==  "Correct result and penalty winner"  ~ 4,
+                      `Prediction Result` ==  "Penalty winner"  ~ 1,
+                      TRUE ~ NA),
   Points = case_when( round == "r32" ~ Pointspre * 1.25 )) 
 
 # Correct scorer Table
@@ -221,10 +228,12 @@ Playerpredictsummary <-fullscorett%>%
     values_from = Count,
     values_fill = 0  )%>%
   select(Player,
-         `Correct score`,
+         `Exact score` = `Correct score`,
          `Correct goal difference`,
          `Correct result`,
-         `Correct scorer`)
+         `Correct scorer`,
+        #  `Correct result and penalty winner`, 
+         `Penalty winner`)
 
 
 Playerpredictpoints <-fullscorett%>%
@@ -233,7 +242,7 @@ Playerpredictpoints <-fullscorett%>%
   summarise(Points = sum(Points, na.rm = TRUE)
   ) %>%
   full_join(Playerpredictsummary, by = "Player")%>%
-  arrange(desc(Points),desc(`Correct score`), Player )
+  arrange(desc(Points),desc(`Exact score`), Player )
 
 
   Playerpredictpoints%>%
@@ -254,7 +263,8 @@ Playerpredictpoints <-fullscorett%>%
   column_spec(3, background = "#AAC0C4", color = "#0c5460") %>%
   column_spec(4, background = "#d1ecf1", color = "#0c5460") %>%
   column_spec(5, background = "#d1ecf1", color = "#0c5460") %>%
-  column_spec(6, background = "#d1ecf1", color = "#0c5460")  
+  column_spec(6, background = "#d1ecf1", color = "#0c5460") %>%
+    column_spec(7, background = "#d1ecf1", color = "#0c5460")
 
 
 ```
