@@ -16,8 +16,9 @@ library(kableExtra)
 ###
 #Tasks:
 # Separate tables for round 32 predictions and results: insert thick lines between rounds
-# Point counting formula for round of 32 and following: correct scorer (revoir si doublé) + Penalty win guess
-# Modify tracking system
+
+# Point counting formula for round of 32 and following: correct scorer (revoir si doublé)
+
 
 Sys.setenv("KOBOTOOLBOX_URL" = "https://eu.kobotoolbox.org/") # or 
 Sys.setenv("KOBOTOOLBOX_TOKEN" = "ce3ff25f11586de5e5463439d5b0629924aa037e")
@@ -135,20 +136,34 @@ fullscoreko <- scoretest%>%
                                      diffgoal < 0 ~ "W2", 
                                      TRUE ~ NA))%>%
   right_join( gamelistfull%>%filter(!is.na(Resultcode), !grepl("Group", Phase))%>% select(matchnumber,ResultGame, ScorerGame, Resultcode, DiffGame, Date, PenaltyWin, PWinCode), by = c("game" = "matchnumber"))%>%
-  mutate(`Prediction Result` = case_when(  score==ResultGame ~ "Correct score",
-                                           diffgoal == DiffGame & Resultcode != "D" ~ "Correct goal difference",
-                                           predictioncode == Resultcode ~ "Correct result",
-                                           # draw + penalty winner correct
-                                           predictioncode == Resultcode & draw == PenaltyWin ~ "Correct result and penalty winner",
-                                           # winner but penalty winner correct
-                                           predictioncode == PWinCode ~ "Penalty winner",
-                                           TRUE ~ NA
-  ),
-  Pointspre = case_when( `Prediction Result` ==  "Correct score" ~ 10,
+  mutate(`Prediction Result` = case_when(  # Exact score
+    score==ResultGame ~ "Correct score", 
+    # Exact goal difference
+    diffgoal == DiffGame & Resultcode != "D" ~ "Correct goal difference",
+    # Correct result
+    predictioncode == Resultcode ~ "Correct result",
+    TRUE ~ NA),
+    PenaltyWinnerBonus = case_when(# Correct draw + penalty winner correct
+      predictioncode == Resultcode & draw == PenaltyWin ~ "Penalty winner bonus",
+      # Wrong result but  penalty winner correct
+      predictioncode == PWinCode ~ "Penalty winner bonus",
+    TRUE ~ NA)
+)%>%
+  select(Player, Date, game,`Prediction Result`, PenaltyWinnerBonus , round)%>%
+  pivot_longer(
+    cols = c(`Prediction Result`, PenaltyWinnerBonus),
+    values_to = "Prediction Result"
+  ) %>%
+  select(-name) %>%
+  filter(!is.na(`Prediction Result`) & `Prediction Result`!= "") %>%
+  group_by(Player, Date, game,round) %>%
+  distinct(`Prediction Result`) %>%
+  ungroup()%>%
+  mutate(Pointspre = case_when( `Prediction Result` ==  "Correct score" ~ 10,
                       `Prediction Result` ==  "Correct goal difference"   ~ 5,
                       `Prediction Result` ==  "Correct result"  ~ 3,  
                       `Prediction Result` ==  "Correct result and penalty winner"  ~ 4,
-                      `Prediction Result` ==  "Penalty winner"  ~ 1,
+                      `Prediction Result` ==  "Penalty winner bonus"  ~ 1,
                       TRUE ~ NA),
   Points = case_when( round == "r32" ~ Pointspre * 1.25 )) 
 
@@ -233,7 +248,7 @@ Playerpredictsummary <-fullscorett%>%
          `Correct result`,
          `Correct scorer`,
         #  `Correct result and penalty winner`, 
-         `Penalty winner`)
+         `Penalty winner bonus`)
 
 
 Playerpredictpoints <-fullscorett%>%
