@@ -283,7 +283,7 @@ Playerpredictpoints <-fullscorett%>%
 
 ```
 
-```{r leaders, warning=FALSE, message=FALSE, echo = FALSE, fig.width= 10}
+```{r leaders, warning=FALSE, message=FALSE, echo = FALSE, fig.width= 14}
 
 Date <- c(unique(fullscorett$Date))
 Player <- c(unique(fullscorett$Player))
@@ -435,7 +435,7 @@ goldenboot%>%
 
 ## 👨‍⚖️ 🏃‍♂️ 🥅 Group phase predictions and results
 
-```{r printroundTT, echo=FALSE, warning=FALSE, message=FALSE,  fig.height= 12,  fig.width= 10}
+```{r printroundTT, echo=FALSE, warning=FALSE, message=FALSE,  fig.height= 12,  fig.width= 13}
 scoretableround2 <- scoretest%>%
   filter(round == "1st" |round == "2nd" |round == "3rd"  )%>%
    select(where(~!all(is.na(.) ))) %>%
@@ -510,7 +510,7 @@ pround2
 ```
 ## 👨‍⚖️ 🏃‍♂️ 🥅 Knock-out phase predictions and results
 
-```{r printroundknockout, echo=FALSE, warning=FALSE, message=FALSE, fig.width= 11}
+```{r printroundknockout, echo=FALSE, warning=FALSE, message=FALSE, fig.width= 13}
 scoretableroundko <- scoretest%>%
   filter(round != "1st"  & round != "2nd" & round != "3rd"  )%>%
    select(where(~!all(is.na(.) ))) %>%
