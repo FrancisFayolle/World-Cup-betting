@@ -17,7 +17,6 @@ library(kableExtra)
 #Tasks:
 # Separate tables for round 32 predictions and results: insert thick lines between rounds
 
-# Point counting formula for round of 32 and following: correct scorer (revoir si doublé)
 
 
 Sys.setenv("KOBOTOOLBOX_URL" = "https://eu.kobotoolbox.org/") # or 
@@ -285,9 +284,19 @@ Playerpredictpoints <-fullscorett%>%
 ```
 
 ```{r leaders, warning=FALSE, message=FALSE, echo = FALSE, fig.width= 10}
+
+Date <- c(unique(fullscorett$Date))
+Player <- c(unique(fullscorett$Player))
+
+
+
+template <- expand.grid(Date = Date, Player = Player)
+  
 Leaders <-fullscorett%>% 
+  full_join(template, by = c("Player", "Date"))%>%
   group_by(Player, Date)%>%
-  summarise(Points = sum(Points, na.rm =TRUE))%>%
+  summarise(Points = sum(Points, na.rm =TRUE)) %>%
+  mutate(Date = as.POSIXct(Date, format = "%d/%m"))%>%
  group_by(Player) %>%
   arrange(Date, .by_group = TRUE) %>%
   mutate(cumulative_points = cumsum(Points)) %>%
@@ -300,7 +309,7 @@ Leaders <-fullscorett%>%
       rank_num == 2 ~ "2nd",
       rank_num == 3 ~ "3rd",
       TRUE ~ paste0(rank_num, "th")),
-      Date = substr(Date, 1, 5)
+      Date = substr(Date, 6, 10)
     ) %>%
   arrange(Date, Ranking) %>%
   ungroup()%>%
