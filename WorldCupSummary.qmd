@@ -508,6 +508,7 @@ pround2 <- ggplot(plot_data2nd, aes(x = Player, y = Match)) +
 pround2
 
 ```
+
 ## 👨‍⚖️ 🏃‍♂️ 🥅 Knock-out phase predictions and results
 
 ```{r printroundknockout, echo=FALSE, warning=FALSE, message=FALSE, fig.width= 13}
@@ -586,7 +587,6 @@ proundko <- ggplot(plot_datako, aes(x = Player, y = Match)) +
 proundko
 
 ```
-
 
 ## Upcoming games 👟
 
