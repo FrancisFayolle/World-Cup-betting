@@ -113,7 +113,7 @@ fullscoreko <- scoretest%>%
   filter(round != "1st"  & round != "2nd" & round != "3rd"  )%>%
    select(where(~!all(is.na(.) ))) %>%
    rename_with(~ gsub("game([0-9]+)scorer", "goalgame\\1", .x))%>%
-  group_by(Player)%>%
+  group_by(round, Player)%>%
   summarise(across(everything(), ~ paste(na.omit(.x), collapse = "")))%>%
   # Keep only the columns you want
   select(round,
@@ -164,7 +164,9 @@ fullscoreko <- scoretest%>%
                       `Prediction Result` ==  "Correct result and penalty winner"  ~ 4,
                       `Prediction Result` ==  "Penalty winner bonus"  ~ 1,
                       TRUE ~ NA),
-  Points = case_when( round == "r32" ~ Pointspre * 1.25 )) 
+  Points = case_when( round == "r32" ~ Pointspre * 1.25, 
+                      round == "r16" ~ Pointspre * 1.5) 
+  )
 
 # Correct scorer Table
 
@@ -172,7 +174,7 @@ scorerknockout <- scoretest%>%
   filter(round != "1st"  & round != "2nd" & round != "3rd"  )%>%
   select(where(~!all(is.na(.) ))) %>%
   rename_with(~ gsub("game([0-9]+)scorer", "goalgame\\1", .x))%>%
-  group_by(Player)%>%
+  group_by(Player, round)%>%
   summarise(across(everything(), ~ paste(na.omit(.x), collapse = "")))%>%
   # Keep only the columns you want
   select(round,
@@ -218,7 +220,8 @@ actualscorer <- gamelistfull%>%
 
 correctscorertable <- scorerknockout%>%
   inner_join(actualscorer, by = c("game" = "matchnumber", "goal" = "ScorerGame"))%>%
-  mutate( Points = case_when(round == "r32" ~ Buts * 4 * 1.25),
+  mutate( Points = case_when(round == "r32" ~ Buts * 4 * 1.25,
+                             round == "r16" ~ Buts * 4 * 1.5),
           `Prediction Result` = "Correct scorer")
 
 
@@ -536,7 +539,8 @@ scoretableroundko <- scoretest%>%
                                      diffgoal > 0 ~ "W1",
                                      diffgoal < 0 ~ "W2", 
                                      TRUE ~ NA))%>%
-  left_join( gamelist, by = c("game" = "matchnumber"))
+  left_join( gamelist, by = c("game" = "matchnumber"))%>%
+  arrange(game)
 
 # Query results 
 resultstableroundko <- gamelistfull%>%
@@ -582,7 +586,8 @@ proundko <- ggplot(plot_datako, aes(x = Player, y = Match)) +
   labs(
     title = "Predictions - Knock-out Stage",
     subtitle = "W1=Home Win, D=Draw, W2=Away Win"
-  )
+  )+
+  geom_hline(yintercept = which(levels(plot_datako$Match) == "Australia vs Egypt") - 0.5, linewidth = 1.5, color = "red")
 
 proundko
 
