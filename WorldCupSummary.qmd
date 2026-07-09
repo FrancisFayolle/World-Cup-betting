@@ -27,6 +27,8 @@ kobo_asset_version_list("aRXZr7eSw3zhFEdX9TKsBP")
 players <- read_excel("./otherquest.xlsx", sheet = "choices")
 
 scoretest <- kobo_submissions("aRXZr7eSw3zhFEdX9TKsBP", all_versions = FALSE, select_multiple_label = FALSE)%>%
+  mutate(across(matches("^game[0-9]+"), 
+                ~ ifelse(.x == "0" | .x == 0, NA, .x)))%>%
   select( -sumgoalgame9, -diffgoalgame9,-resultgamegame9)%>%
   select(where(~!all(is.na(.) )),
          -matches("^final_.*"),
