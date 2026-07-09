@@ -15,7 +15,7 @@ library(kableExtra)
 
 ###
 #Tasks:
-# Separate tables for round 32 predictions and results: insert thick lines between rounds
+# Golden boot and finalist + winner guess
 
 
 
@@ -165,7 +165,8 @@ fullscoreko <- scoretest%>%
                       `Prediction Result` ==  "Penalty winner bonus"  ~ 1,
                       TRUE ~ NA),
   Points = case_when( round == "r32" ~ Pointspre * 1.25, 
-                      round == "r16" ~ Pointspre * 1.5) 
+                      round == "r16" ~ Pointspre * 1.5,
+                      round == "r4" ~ Pointspre * 1.75) 
   )
 
 # Correct scorer Table
@@ -221,7 +222,8 @@ actualscorer <- gamelistfull%>%
 correctscorertable <- scorerknockout%>%
   inner_join(actualscorer, by = c("game" = "matchnumber", "goal" = "ScorerGame"))%>%
   mutate( Points = case_when(round == "r32" ~ Buts * 4 * 1.25,
-                             round == "r16" ~ Buts * 4 * 1.5),
+                             round == "r16" ~ Buts * 4 * 1.5,
+                             round == "r4" ~ Buts * 4 * 1.75),
           `Prediction Result` = "Correct scorer")
 
 
@@ -438,7 +440,7 @@ goldenboot%>%
 
 ## 👨‍⚖️ 🏃‍♂️ 🥅 Group phase predictions and results
 
-```{r printroundTT, echo=FALSE, warning=FALSE, message=FALSE,  fig.height= 12,  fig.width= 13}
+```{r printroundTT, echo=FALSE, warning=FALSE, message=FALSE,  fig.height= 15,  fig.width= 13}
 scoretableround2 <- scoretest%>%
   filter(round == "1st" |round == "2nd" |round == "3rd"  )%>%
    select(where(~!all(is.na(.) ))) %>%
@@ -480,7 +482,7 @@ plot_data2nd <- scoretableround2 %>%
 pround2 <- ggplot(plot_data2nd, aes(x = Player, y = Match)) +
   geom_tile(aes(fill = predictioncode, alpha = Player == "Final Result"), 
             color = "white", linewidth = 0.5) +
-  geom_text(aes(label = score), size = 3.5) +
+  geom_text(aes(label = score), size = 4.5) +
   scale_fill_manual(
     values = c(
       "W1" = "#83f28f",
@@ -496,13 +498,13 @@ pround2 <- ggplot(plot_data2nd, aes(x = Player, y = Match)) +
              linewidth = 1.5, color = "black") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1.2, size = 10),
-    axis.text.y = element_text(size = 9),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1.2, size = 12),
+    axis.text.y = element_text(size = 12),
     axis.title = element_blank(),
     panel.grid = element_blank(),
     legend.position = "right",
-    plot.title = element_text(hjust = 0.5, size = 12, face = "bold")
-  ) +
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+  )+
   labs(
     title = "Predictions - Group Phase",
     subtitle = "W1=Home Win, D=Draw, W2=Away Win"
@@ -514,7 +516,7 @@ pround2
 
 ## 👨‍⚖️ 🏃‍♂️ 🥅 Knock-out phase predictions and results
 
-```{r printroundknockout, echo=FALSE, warning=FALSE, message=FALSE, fig.width= 13}
+```{r printroundknockout, echo=FALSE, warning=FALSE, message=FALSE, fig.width= 13, fig.height=14}
 scoretableroundko <- scoretest%>%
   filter(round != "1st"  & round != "2nd" & round != "3rd"  )%>%
    select(where(~!all(is.na(.) ))) %>%
@@ -534,13 +536,15 @@ scoretableroundko <- scoretest%>%
     names_to = c(".value", "game"),
     names_pattern = "(score|sumgoal|diffgoal|resultgame|goal|draw)(.*)"
   )%>%
+  filter(!is.na(score))%>%
   mutate( predictioncode = case_when(diffgoal == 0 ~ "D", 
                                      diffgoal == "" ~ "EMPTY",
                                      diffgoal > 0 ~ "W1",
                                      diffgoal < 0 ~ "W2", 
                                      TRUE ~ NA))%>%
   left_join( gamelist, by = c("game" = "matchnumber"))%>%
-  arrange(game)
+  mutate(gamenumber = as.integer(str_replace(game, "game", "")))%>%
+  arrange(gamenumber)
 
 # Query results 
 resultstableroundko <- gamelistfull%>%
@@ -560,7 +564,7 @@ plot_datako <- scoretableroundko %>%
 proundko <- ggplot(plot_datako, aes(x = Player, y = Match)) +
   geom_tile(aes(fill = predictioncode, alpha = Player == "Final Result"), 
             color = "white", linewidth = 0.5) +
-  geom_text(aes(label = score), size = 3.5) +
+  geom_text(aes(label = score), size = 4.5) +
   scale_fill_manual(
     values = c(
       "W1" = "#83f28f",
@@ -576,18 +580,19 @@ proundko <- ggplot(plot_datako, aes(x = Player, y = Match)) +
              linewidth = 1.5, color = "black") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1.2, size = 10),
-    axis.text.y = element_text(size = 9),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1.2, size = 12),
+    axis.text.y = element_text(size = 12),
     axis.title = element_blank(),
     panel.grid = element_blank(),
     legend.position = "right",
-    plot.title = element_text(hjust = 0.5, size = 12, face = "bold")
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
   ) +
   labs(
     title = "Predictions - Knock-out Stage",
     subtitle = "W1=Home Win, D=Draw, W2=Away Win"
   )+
-  geom_hline(yintercept = which(levels(plot_datako$Match) == "Australia vs Egypt") - 0.5, linewidth = 1.5, color = "red")
+  geom_hline(yintercept = which(levels(plot_datako$Match) == "Australia vs Egypt") - 0.5, linewidth = 1.5, color = "red")+
+  geom_hline(yintercept = which(levels(plot_datako$Match) == "Switzerland vs Colombia") - 0.5, linewidth = 1.5, color = "red")
 
 proundko
 
