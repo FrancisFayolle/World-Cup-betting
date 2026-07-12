@@ -593,7 +593,8 @@ proundko <- ggplot(plot_datako, aes(x = Player, y = Match)) +
     subtitle = "W1=Home Win, D=Draw, W2=Away Win"
   )+
   geom_hline(yintercept = which(levels(plot_datako$Match) == "Australia vs Egypt") - 0.5, linewidth = 1.5, color = "red")+
-  geom_hline(yintercept = which(levels(plot_datako$Match) == "Switzerland vs Colombia") - 0.5, linewidth = 1.5, color = "red")
+  geom_hline(yintercept = which(levels(plot_datako$Match) == "Switzerland vs Colombia") - 0.5, linewidth = 1.5, color = "red")+
+  geom_hline(yintercept = which(levels(plot_datako$Match) == "Argentina vs Switzerland") - 0.5, linewidth = 1.5, color = "red")
 
 proundko
 
