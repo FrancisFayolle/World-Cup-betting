@@ -168,7 +168,9 @@ fullscoreko <- scoretest%>%
   Points = case_when( round == "r32" ~ Pointspre * 1.25, 
                       round == "r16" ~ Pointspre * 1.5,
                       round == "r4" ~ Pointspre * 1.75,
-                      round == "r2" ~ Pointspre * 2) 
+                      round == "r2" ~ Pointspre * 2,
+                      game == "game103" ~Pointspre * 2.5,
+                      game == "game104" ~Pointspre * 3) 
   )
 
 # Correct scorer Table
@@ -226,7 +228,9 @@ correctscorertable <- scorerknockout%>%
   mutate( Points = case_when(round == "r32" ~ Buts * 4 * 1.25,
                              round == "r16" ~ Buts * 4 * 1.5,
                              round == "r4" ~ Buts * 4 * 1.75,
-                             round == "r2" ~ Buts * 4 * 2),
+                             round == "r2" ~ Buts * 4 * 2,
+                             game == "game103" ~Buts * 4 * 2.5,
+                             game == "game104" ~Buts * 4 * 3),
           `Prediction Result` = "Correct scorer")
 
 
