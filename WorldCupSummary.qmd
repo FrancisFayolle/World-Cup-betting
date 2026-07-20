@@ -233,15 +233,43 @@ correctscorertable <- scorerknockout%>%
                              game == "game104" ~Buts * 4 * 3),
           `Prediction Result` = "Correct scorer")
 
+# Final and golden boot points
 
+finalpoints <- finalandgoldenboot%>%
+  mutate(`Final Teams` = case_when(
+      grepl("spain", Final, ignore.case = TRUE) & 
+      grepl("argentina", Final, ignore.case = TRUE) ~ 45,
+      grepl("spain", Final, ignore.case = TRUE) ~ 15,
+      grepl("argentina", Final, ignore.case = TRUE) ~ 15,
+      TRUE ~ NA
+    ),
+    `Winning Team` = case_when(grepl("spain", `World Champion 2026`, ignore.case = TRUE) ~ 30,
+      TRUE ~ NA),
+    `Golden Boot` = case_when(grepl("mbappe", `Golden Boot`, ignore.case = TRUE) ~ 30,
+      TRUE ~ NA),
+    Date = "19/07/2026"
+  )%>%
+  select(Player, Date, `Final Teams`,`Winning Team`, `Golden Boot`)%>%
+  pivot_longer(
+    cols = c(`Final Teams`, `Winning Team`, `Golden Boot`),
+    names_to = "metric",
+    values_to = "value"
+  )%>%
+  select(Player, 
+         Date, 
+         `Prediction Result` = metric,
+         Points = value)%>%
+  filter(!is.na(Points))
 
 # Merge all tables
 
 fullscorett <- bind_rows(fullscore%>%select(Player,`Prediction Result`, Points, Date),
                          fullscoreko%>%select(Player,`Prediction Result`, Points, Date),
-                         correctscorertable %>%select(Player, `Prediction Result`, Date, Points) )
+                         correctscorertable %>%select(Player, `Prediction Result`, Date, Points) ,
+finalpoints)
 
 # Merge and final scoring
+
 
 Playerpredictsummary <-fullscorett%>%
   filter(!is.na(`Prediction Result`))%>%
@@ -259,7 +287,10 @@ Playerpredictsummary <-fullscorett%>%
          `Correct result`,
          `Correct scorer`,
         #  `Correct result and penalty winner`, 
-         `Penalty winner bonus`)
+         `Penalty winner bonus`,
+        `Final Teams`,
+        `Winning Team`,
+        `Golden Boot`)
 
 
 Playerpredictpoints <-fullscorett%>%
@@ -606,31 +637,4 @@ proundko
 
 ```
 
-## Upcoming games 👟
 
-```{r games, warning=FALSE, message=FALSE, echo = FALSE}
-
-gamelistfull %>%
-  mutate(Date = as.Date(gsub("\\?", "/", Date), format = "%d/%m/%Y"))%>%
-  filter(Date  >= Sys.Date() & Date <= Sys.Date() + 7 & !(Date == Sys.Date() & Time <= "12:00"))%>%
-  select(Match, Date, Time)%>%
-  arrange(Date, Time)%>%
-  kbl(
-    caption = "<b>Game for the upcoming 7 days</b>",
-    align = 'c',
-    booktabs = TRUE
-  ) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-    full_width = TRUE,
-    position = "center",
-    font_size = 14
-  ) %>%
-  row_spec(0, background = "#2c3e50", color = "white", bold = TRUE) %>%
-  column_spec(1, background = "#e8eaf6", color = "#1a237e", bold = TRUE) %>%
-  column_spec(2, background = "#d1ecf1", color = "#0c5460") %>%
-  column_spec(3, background = "#fff3cd", color = "#856404", bold = TRUE) 
-
-
-
-```
